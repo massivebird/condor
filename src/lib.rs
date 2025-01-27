@@ -16,9 +16,9 @@ pub struct CourseStatus {
     pub waitlist_capacity: u32,
     pub waitlist_students: u32,
     pub waitlist_remaining: u32,
-    pub cross_list_capacity: u32,
-    pub cross_list_students: u32,
-    pub cross_list_remaining: u32,
+    // pub cross_list_capacity: u32,
+    // pub cross_list_students: u32,
+    // pub cross_list_remaining: u32,
 }
 
 impl CourseStatus {
@@ -86,7 +86,7 @@ pub async fn get_course_status(
     let code = captures.name("code").unwrap().as_str();
 
     let regex = Regex::new(
-        r#"Seats</SPAN></th>\n<td CLASS=\"dddefault\">(?<actual_capacity>\d+)</td>\n<td CLASS=\"dddefault\">(?<actual_students>\d+)</td>\n<td CLASS=\"dddefault\">(?<actual_remaining>-?\d+)</td>\n</tr>\n<tr>\n<th CLASS=\"ddlabel\" scope=\"row\" ><SPAN class=\"fieldlabeltext\">Waitlist Seats</SPAN></th>\n<td CLASS=\"dddefault\">(?<waitlist_capacity>\d+)</td>\n<td CLASS=\"dddefault\">(?<waitlist_students>\d+)</td>\n<td CLASS=\"dddefault\">(?<waitlist_remaining>-?\d+)</td>\n</tr>\n<tr>\n<th CLASS=\"ddlabel\" scope=\"row\" ><SPAN class=\"fieldlabeltext\">Cross List Seats</SPAN></th>\n<td CLASS=\"dddefault\">(?<cross_list_capacity>-?\d+)</td>\n<td CLASS=\"dddefault\">(?<cross_list_students>-?\d+)</td>\n<td CLASS=\"dddefault\">(?<cross_list_remaining>-?\d+)</td>"#,
+        r#"Seats</SPAN></th>\n<td CLASS=\"dddefault\">(?<actual_capacity>\d+)</td>\n<td CLASS=\"dddefault\">(?<actual_students>\d+)</td>\n<td CLASS=\"dddefault\">(?<actual_remaining>-?\d+)</td>\n</tr>\n<tr>\n<th CLASS=\"ddlabel\" scope=\"row\" ><SPAN class=\"fieldlabeltext\">Waitlist Seats</SPAN></th>\n<td CLASS=\"dddefault\">(?<waitlist_capacity>\d+)</td>\n<td CLASS=\"dddefault\">(?<waitlist_students>\d+)</td>\n<td CLASS=\"dddefault\">(?<waitlist_remaining>-?\d+)<"#,
     )?;
 
     let Some(captures) = regex.captures(&html) else {
@@ -109,9 +109,19 @@ pub async fn get_course_status(
     let waitlist_students: u32 = try_get_capture!("waitlist_students");
     let waitlist_remaining: u32 = waitlist_capacity.saturating_sub(waitlist_students);
 
-    let cross_list_capacity: u32 = try_get_capture!("cross_list_capacity");
-    let cross_list_students: u32 = try_get_capture!("cross_list_students");
-    let cross_list_remaining: u32 = cross_list_capacity.saturating_sub(cross_list_students);
+    // Not all courses have cross list stats. I'll just leave this here
+
+    // let regex = Regex::new(
+    //     r#">Cross List Seats</SPAN></th>\\n<td CLASS=\\"dddefault\\">(?<cross_list_capacity>-?\d+)</td>\\n<td CLASS=\\"dddefault\\">(?<cross_list_students>-?\d+)</td>\\n<td CLASS=\\"dddefault\\">(?<cross_list_remaining>-?\d+)</td>"#,
+    // )?;
+
+    // let Some(captures) = regex.captures(&html) else {
+    //     return Err(CaptureGenError::new(crn).into());
+    // };
+
+    // let cross_list_capacity: u32 = try_get_capture!("cross_list_capacity");
+    // let cross_list_students: u32 = try_get_capture!("cross_list_students");
+    // let cross_list_remaining: u32 = cross_list_capacity.saturating_sub(cross_list_students);
 
     Ok(CourseStatus {
         title: title.to_string(),
@@ -122,8 +132,8 @@ pub async fn get_course_status(
         waitlist_capacity,
         waitlist_students,
         waitlist_remaining,
-        cross_list_capacity,
-        cross_list_students,
-        cross_list_remaining,
+        // cross_list_capacity,
+        // cross_list_students,
+        // cross_list_remaining,
     })
 }
